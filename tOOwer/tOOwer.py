@@ -43,7 +43,7 @@ class Pole:
     :param name: str, name of pole
     :param disks: list, list of disks
     """
-    def __init__(self, name, disks=[]):
+    def __init__(self, name, disks):
         self.name = name
         self.disks = disks
 
@@ -67,7 +67,13 @@ class Pole:
             raise Exception(f"You cannot put a disk of size {disk.size} on top of a disk of size {self[-1].size}, ya idiot.")
 
     def __getitem__(self, item):
-        return self.disks[item]
+        return self.disks.__getitem__(item)
+
+    def __setitem__(self, item):
+        return self.disks.__setitem__(item)
+
+    def __delitem__(self, item):
+        return self.disks.__delitem__(item)
 
     def __iter__(self):
         return self.disks.__iter__()
@@ -79,7 +85,7 @@ class Pole:
         :return: Disk, the top disk of the pole.
         """
         d = self[-1]    # Record top disk
-        self.disks = self.disks[:-1]    # Remove the top disk from self.disks
+        self.disks = self[:-1]    # Remove the top disk from self.disks
         return d
 
     def __repr__(self):
@@ -100,26 +106,32 @@ class Tower:
         self.From = From
         self.Using = Using
         self.To = To
-        self.poles = [Pole(From, [Disk(n-i) for i in range(n)]), Pole(Using), Pole(To)]
+        self.poles = [Pole(From, [Disk(n-i) for i in range(n)]), Pole(Using, []), Pole(To, [])]
         self.pole_dict = {From: 0, Using: 1, To: 2}
 
     def __getitem__(self, item):
-        return self.poles[self.pole_dict[item]]
+        return self.poles.__getitem__(self.pole_dict[item])
 
-    def move(self, From, To):
-        if len(self[From]) == 0:
-            raise Exception(f"Pole {From} has no disks on it to move.")
-        d = self[From].pop()
+    def __setitem__(self, item):
+        return self.poles.__setitem__(self.pole_dict[item])
+
+    def __delitem__(self, item):
+        return self.poles.__delitem__(self.pole_dict[item])
+
+    def move(self, A, B):
+        if len(self[A]) == 0:
+            raise Exception(f"Pole {A} has no disks on it to move.")
+        d = self[A].pop()
         try:
-            self[To].push(d)
+            self[B].push(d)
         except Exception as e:
-            self[From].push(d)
+            self[A].push(d)
             raise e
         finally:
             return self
 
     def __repr__(self):
-        return str([self[i] for i in self.pole_dict.values()])
+        return str([self[i] for i in self.pole_dict])
 
     def __iter__(self):
         return self.poles.__iter__()
@@ -147,24 +159,30 @@ class Tower:
         except Exception as e:
             raise Exception(e, "This method is designed for jupyter/IPython.")
 
-        error = False
+        error = False   # Initialise with no errors
+        count = 0   # Count number of moves
 
         while not self.solved():
+            clear_output(wait=False)
             print(self)
             if error:
                 print("The last move was invalid.")
 
-            user_input = input("Input move using {FROM} to {TO} syntax")
+            user_input = input("Input move using {FROM} to {TO} syntax:")
 
             try:
                 FROM = user_input.split(' to ')[0]
                 TO = user_input.split(' to ')[1]
                 self.move(FROM, TO)
                 error = False
+                count += 1
             except Exception as e:
                 error = True
                 pass
 
-            clear_output
+            clear_output(wait=False)
             print(self)
-            print("Solved!")
+            if count == 2**self.n - 1:
+                print(f"Optimally solved in {count} moves!")
+            else:
+                print(f"Solved in {count} moves!")
