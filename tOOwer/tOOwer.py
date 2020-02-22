@@ -1,5 +1,6 @@
 # This file contains all the necessary classes to implement a basic Tower of Hanoi implementation in python
 
+
 class Disk:
     """
     A Disk class has a size and can be compared to other disks.
@@ -64,16 +65,11 @@ class Pole:
             self.disks.append(disk)
             return self
         else:
-            raise Exception(f"You cannot put a disk of size {disk.size} on top of a disk of size {self[-1].size}, ya idiot.")
+            raise Exception(f"You cannot put a disk of size {disk.size} on top of a disk of size {self[-1].size},"
+                            f" ya idiot.")
 
     def __getitem__(self, item):
         return self.disks.__getitem__(item)
-
-    def __setitem__(self, item):
-        return self.disks.__setitem__(item)
-
-    def __delitem__(self, item):
-        return self.disks.__delitem__(item)
 
     def __iter__(self):
         return self.disks.__iter__()
@@ -111,12 +107,6 @@ class Tower:
 
     def __getitem__(self, item):
         return self.poles.__getitem__(self.pole_dict[item])
-
-    def __setitem__(self, item):
-        return self.poles.__setitem__(self.pole_dict[item])
-
-    def __delitem__(self, item):
-        return self.poles.__delitem__(self.pole_dict[item])
 
     def move(self, A, B):
         if len(self[A]) == 0:
